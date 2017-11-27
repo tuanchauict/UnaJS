@@ -4,6 +4,8 @@ function Tuna(information){
 
     function init(information){
         me.$el = document.getElementById(information.el);
+        me.$code = '<' + me.$el.nodeName + '>' + me.$el.innerHTML + '</' + me.$el.nodeName + '>';
+        me.$tree = parseHtml(me.$code);
         me.$data = {};
         var data = information.data;
         var $data = me.$data;

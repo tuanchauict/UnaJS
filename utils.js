@@ -42,3 +42,9 @@ if (!Object.prototype.unwatch) {
         }
     });
 }
+
+function evalContext(js, context) {
+    return function () {
+        return eval(js)
+    }.call(context);
+}

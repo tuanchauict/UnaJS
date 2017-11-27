@@ -9,7 +9,12 @@
 </head>
 <body>
 <div id="app">
-
+    <div t-if="this.foo===1">
+        Con heo
+    </div>
+    <div t-if="this.foo!==1">
+        Con meo
+    </div>
 </div>
 <script src="app.js"></script>
 </body>
