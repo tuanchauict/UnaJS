@@ -8,8 +8,8 @@ function parseHtml(html){
     function Node(){
         this.name = '';
         this.type = TYPE_TEXT;
-        this.ifNode = false;
-        this.forNode = false;
+        this.isIfNode = false;
+        this.isForNode = false;
         this.children = [];
 
 
@@ -31,9 +31,10 @@ function parseHtml(html){
         node.type = dom.nodeType === 3 ? TYPE_TEXT : TYPE_NODE;
         if (node.type === TYPE_NODE){
             node.name = node.nodeName;
+            node.isIfNode = dom.hasAttribute('t-if');
+            node.isForNode = dom.hasAttribute('t-for');
             node.ifNode = dom.getAttribute('t-if');
             node.forNode = dom.hasAttribute('t-for');
-
         }
 
         if (dom.nodeType === 1){
