@@ -6,6 +6,8 @@ function Tuna(information){
         me.$el = document.getElementById(information.el);
         me.$code = '<' + me.$el.nodeName + '>' + me.$el.innerHTML + '</' + me.$el.nodeName + '>';
         me.$tree = parseHtml(me.$code);
+        console.log(me.$tree);
+
         me.$data = {};
         var data = information.data;
         var $data = me.$data;
@@ -18,6 +20,8 @@ function Tuna(information){
                 console.log(prop, old, val);
             });
         }
+
+        console.log(me.$tree.toHtml(me.$data));
     }
 
     function updateView(){
