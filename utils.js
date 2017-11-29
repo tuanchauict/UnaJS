@@ -65,32 +65,21 @@ function evalContext(js, globalContext, localContext) {
         var l = this.local;
         for (var k in g) {
             if (!g.hasOwnProperty(k)) continue;
-            var v = g[k];
-            if (typeof(v) === "object") {
-                s += "var " + k + "=" + JSON.stringify(v) + ";";
-            } else {
-                s += "var " + k + "=" + v + ";";
-            }
+            s += "var {0} = g.{0};".format(k);
         }
-        for (var k in m){
+        for (var k in m) {
             if (!m.hasOwnProperty(k)) continue;
-            s += "var " + k + "=" + m[k] + ";";
+            s += "var {0} = m.{0};".format(k);
         }
 
         if (l) {
             for (var k in l) {
                 if (!l.hasOwnProperty(k)) continue;
-                var v = l[k];
-                if (typeof(v) === "object") {
-                    s += "var " + k + "=" + JSON.stringify(v) + ";";
-                } else {
-                    s += "var " + k + "=" + v + ";";
-                }
+                s += "var {0} = l.{0};".format(k);
             }
         }
-
         s += js;
-        // console.log("js =", s);
+        console.log(s);
         return eval(s);
     }.call({global: globalContext, local: localContext});
 }

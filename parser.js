@@ -10,7 +10,7 @@ function parseHtml(html) {
         this.isIfNode = false;
         this.isForNode = false;
         this.children = [];
-        this.tAttributes = {};
+        this.uAttributes = {};
         this.attributes = {};
 
 
@@ -95,7 +95,38 @@ function parseHtml(html) {
                     continue;
                 element.setAttribute(k, me.attributes[k]);
             }
-            // TODO render tAttribute
+
+            if (me.uAttributes.hasOwnProperty('u-click')) {
+                element.onclick = function(){
+                    evalContext(me.uAttributes['u-click'], globalContext, context);
+                    // console.log('click');
+                }
+            }
+            if (me.uAttributes.hasOwnProperty('u-bind')) {
+                var binder = me.uAttributes['u-bind'];
+                element.value = evalContext(binder, globalContext, context);
+                var run = function(e){
+                    console.log(element.value);
+                    var js;
+                    if (binder.indexOf('.') >= 0) {
+                        js = '{0} = {1}'.format(binder, JSON.stringify(element.value));
+                    } else {
+                        if (context !== null && context.hasOwnProperty(binder)){
+                            js = 'l.{0} = {1}'.format(binder, JSON.stringify(element.value));
+                        } else {
+                            js = 'g.{0} = {1}'.format(binder, JSON.stringify(element.value));
+                        }
+                    }
+
+                    evalContext(js, globalContext, context)
+                };
+                element.onchange = run;
+                // element.onfocus = run;
+                // element.onkeydown = run;
+                // element.onkeyup = run;
+                // element.onblur = run;
+            }
+            // TODO render more uAttribute
             for (var i = 0; i < me.children.length; i++) {
                 var childElem = me.children[i].toDOM(globalContext, context);
 
@@ -112,7 +143,6 @@ function parseHtml(html) {
             }
             return element;
         };
-
     }
 
 
@@ -143,7 +173,7 @@ function parseHtml(html) {
                 name = attr.name;
                 if (name.startsWith('u-')) {
                     if (name !== 'u-if' && name !== 'u-for') {
-                        node.tAttributes[name] = attr.value;
+                        node.uAttributes[name] = attr.value;
                     }
                 } else {
                     node.attributes[name] = attr.value;
