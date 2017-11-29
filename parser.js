@@ -14,37 +14,60 @@ function parseHtml(html) {
         this.attributes = {};
 
 
-        this.toHtml = function (context) {
-            if (this.isIfNode && !evalContext(this.ifNode, context)) {
+        this.toDOM = function (globalContext, context) {
+            if (this.isIfNode && !evalContext(this.ifNode, globalContext, context)) {
                 return null;
             }
 
             if (this.isForNode) {
-                return renderFor(context);
+                return renderFor(globalContext, context);
             }
 
             if (this.type === TYPE_TEXT) {
-                return renderText(context);
+                return renderText(globalContext, context);
             }
 
-            return renderNode(context);
+            return renderNode(globalContext, context);
         };
 
-        var renderFor = function (context) {
+        var renderFor = function (globalContext, context) {
             var result = [];
             result.array = true;
             var arr = me.forNode.split(/\s+in\s+/);
-            var data = evalContext(arr[1], context);
+            var data = evalContext(arr[1],globalContext,  context);
+            var indexes = arr[0].split(',');
+            var keyIndex = '';
+            var keyItem = '';
+            if (indexes.length === 2){
+                keyIndex = indexes[0].trim();
+                keyItem = indexes[1].trim();
+            } else {
+                keyItem = indexes[0].trim();
+            }
+
 
             me.isForNode = false;
             for (var i = 0; i < data.length; i++){
-                result.push(me.toHtml(data[i]))
+                var localContext = {};
+                if (context){
+                    for (var k in context){
+                        if (context.hasOwnProperty(k)){
+                            localContext[k] = context[k];
+                        }
+                    }
+                }
+                localContext[keyItem] = data[i];
+                if (keyIndex){
+                    localContext[keyIndex] = i;
+                }
+
+                result.push(me.toDOM(globalContext, localContext))
             }
             me.isForNode = true;
             return result;
         };
 
-        var renderText = function (context) {
+        var renderText = function (globalContext, context) {
             var text = me.text;
 
             var re = /{{.+?}}/g;
@@ -56,7 +79,7 @@ function parseHtml(html) {
             for (var i = 0; i < arr.length; i++){
                 js = arr[i];
                 if (!(js in map)) {
-                    var value = evalContext(js.substr(2, js.length - 4), context);
+                    var value = evalContext(js.substr(2, js.length - 4),globalContext,  context);
                     map[js] = value;
                     text = text.replace(js, value);
                 }
@@ -65,7 +88,7 @@ function parseHtml(html) {
             return document.createTextNode(text);
         };
 
-        var renderNode = function (context) {
+        var renderNode = function (globalContext, context) {
             var element = document.createElement(me.name);
             for (var k in me.attributes) {
                 if (!me.attributes.hasOwnProperty(k))
@@ -74,7 +97,7 @@ function parseHtml(html) {
             }
             // TODO render tAttribute
             for (var i = 0; i < me.children.length; i++) {
-                var childElem = me.children[i].toHtml(context);
+                var childElem = me.children[i].toDOM(globalContext, context);
 
                 if (childElem) {
                     if ('array' in childElem){
@@ -102,6 +125,9 @@ function parseHtml(html) {
     };
 
     var parse = function (dom) {
+        if (dom.nodeType === 8){
+            return null;
+        }
         var node = new Node();
         node.type = dom.nodeType === 3 ? TYPE_TEXT : TYPE_NODE;
         if (node.type === TYPE_NODE) {
@@ -129,7 +155,10 @@ function parseHtml(html) {
             // console.log(cs);
             var children = [];
             for (var i = 0, l = cs.length; i < l; i++) {
-                children.push(parse(cs[i]));
+                var child = parse(cs[i]);
+                if (child){
+                    children.push(child);
+                }
             }
             node.children = children;
         } else {

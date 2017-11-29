@@ -55,8 +55,35 @@ if (!String.prototype.format) {
     };
 }
 
-function evalContext(js, context) {
-    return function () {
-        return eval(js)
-    }.call(context);
+function evalContext(js, globalContext, localContext) {
+    return function(){
+        var s = "";
+        var g = this.global;
+        var l = this.local;
+        for (var k in g) {
+            if (!g.hasOwnProperty(k)) continue;
+            var v = g[k];
+            if (typeof(v) === "object"){
+                s += "var " + k + "=" + JSON.stringify(v) + ";";
+            } else {
+                s += "var " + k + "=" + v + ";";
+            }
+        }
+
+        if (l) {
+            for (var k in l) {
+                if (!l.hasOwnProperty(k)) continue;
+                var v = l[k];
+                if (typeof(v) === "object"){
+                    s += "var " + k + "=" + JSON.stringify(v) + ";";
+                } else {
+                    s += "var " + k + "=" + v + ";";
+                }
+            }
+        }
+
+        s += js;
+        // console.log("js =", s);
+        return eval(s);
+    }.call({global: globalContext, local: localContext});
 }

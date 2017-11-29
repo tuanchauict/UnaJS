@@ -18,11 +18,11 @@ function Tuna(information){
             $data[k] = data[k];
             $data.watch(k, function(prop, old, val){
                 console.log(prop, old, val);
-                me.$tree = parseHtml(me.$code);
+                console.log(me.$tree.toDOM(me.$data, null));
             });
         }
 
-        console.log(me.$tree.toHtml(me.$data));
+        console.log(me.$tree.toDOM(me.$data, null));
     }
 
     function updateView(){
