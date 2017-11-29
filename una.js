@@ -15,11 +15,26 @@ function Tuna(information){
             if (!(data.hasOwnProperty(k))){
                 continue;
             }
+
             $data[k] = data[k];
             $data.watch(k, function(prop, old, val){
                 // console.log(prop, old, val);
                 updateView();
             });
+
+            if (typeof data[k] === 'object') {
+                if (!Array.isArray(data[k])){
+                    var datak = $data[k];
+                    for (var kk in datak) {
+                        // console.log(kk);
+                        // if (!datak.hasOwnProperty(k)) continue;
+                        datak.watch(kk, function (prop, old, val) {
+                            updateView();
+                            console.log('con heo');
+                        })
+                    }
+                }
+            }
         }
 
         updateView();

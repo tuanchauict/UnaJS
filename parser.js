@@ -118,7 +118,8 @@ function parseHtml(html) {
                         }
                     }
 
-                    evalContext(js, globalContext, context)
+                    evalContext(js, globalContext, context);
+
                 };
                 element.onchange = run;
                 // element.onfocus = run;
