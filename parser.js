@@ -101,7 +101,6 @@ function parseHtml(html) {
 
                 if (childElem) {
                     if ('array' in childElem){
-                        console.log(childElem);
                         for (var j = 0; j < childElem.length; j++){
                             element.appendChild(childElem[j]);
                         }

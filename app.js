@@ -3,6 +3,9 @@ var app = new Tuna({
     data: {
         foo: 1,
         array: [100, 200, 300]
+    },
+    methods: {
+
     }
 });
 

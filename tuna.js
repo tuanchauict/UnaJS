@@ -6,7 +6,6 @@ function Tuna(information){
         me.$el = document.getElementById(information.el);
         me.$code = '<' + me.$el.nodeName + '>' + me.$el.innerHTML + '</' + me.$el.nodeName + '>';
         me.$tree = parseHtml(me.$code);
-        console.log(me.$tree);
 
         me.$data = {};
         var data = information.data;
@@ -17,16 +16,17 @@ function Tuna(information){
             }
             $data[k] = data[k];
             $data.watch(k, function(prop, old, val){
-                console.log(prop, old, val);
-                console.log(me.$tree.toDOM(me.$data, null));
+                // console.log(prop, old, val);
+                updateView();
             });
         }
-
-        console.log(me.$tree.toDOM(me.$data, null));
     }
 
     function updateView(){
+        var newDOM = me.$tree.toDOM(me.$data, null);
+        console.log(newDOM);
         //TODO
+
     }
 
 

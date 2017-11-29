@@ -13,7 +13,9 @@ if (!Object.prototype.watch) {
                 }
                 , setter = function (val) {
                     oldval = newval;
-                    return newval = handler.call(this, prop, oldval, val);
+                    newval = val;
+                    handler.call(this, prop, oldval, val);
+                    return newval;
                 }
             ;
 
@@ -44,9 +46,9 @@ if (!Object.prototype.unwatch) {
 }
 
 if (!String.prototype.format) {
-    String.prototype.format = function() {
+    String.prototype.format = function () {
         var args = arguments;
-        return this.replace(/{(\d+)}/g, function(match, number) {
+        return this.replace(/{(\d+)}/g, function (match, number) {
             return typeof args[number] !== 'undefined'
                 ? args[number]
                 : match
@@ -56,14 +58,14 @@ if (!String.prototype.format) {
 }
 
 function evalContext(js, globalContext, localContext) {
-    return function(){
+    return function () {
         var s = "";
         var g = this.global;
         var l = this.local;
         for (var k in g) {
             if (!g.hasOwnProperty(k)) continue;
             var v = g[k];
-            if (typeof(v) === "object"){
+            if (typeof(v) === "object") {
                 s += "var " + k + "=" + JSON.stringify(v) + ";";
             } else {
                 s += "var " + k + "=" + v + ";";
@@ -74,7 +76,7 @@ function evalContext(js, globalContext, localContext) {
             for (var k in l) {
                 if (!l.hasOwnProperty(k)) continue;
                 var v = l[k];
-                if (typeof(v) === "object"){
+                if (typeof(v) === "object") {
                     s += "var " + k + "=" + JSON.stringify(v) + ";";
                 } else {
                     s += "var " + k + "=" + v + ";";
