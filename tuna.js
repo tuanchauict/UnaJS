@@ -21,6 +21,8 @@ function Tuna(information){
                 updateView();
             });
         }
+
+        updateView();
     }
 
     function updateView(){
@@ -29,7 +31,10 @@ function Tuna(information){
         //TODO
         me.$el.innerHTML = '';
         me.$el.appendChild(newDOM);
-
+        // for(var i = 0; i < newDOM.childNodes.length; i++){
+        //     console.log(newDOM.childNodes[i]);
+        //     me.$el.appendChild(newDOM.childNodes[i]);
+        // }
     }
 
 

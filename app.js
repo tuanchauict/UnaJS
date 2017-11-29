@@ -11,4 +11,4 @@ var app = new Tuna({
     }
 });
 
-app.$data.foo = 2;
+// app.$data.foo = 2;
