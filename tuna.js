@@ -27,6 +27,8 @@ function Tuna(information){
         var newDOM = me.$tree.toDOM({data: me.$data, methods: me.$methods}, null);
         console.log(newDOM);
         //TODO
+        me.$el.innerHTML = '';
+        me.$el.appendChild(newDOM);
 
     }
 
