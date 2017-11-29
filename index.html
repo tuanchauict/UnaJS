@@ -15,9 +15,8 @@
     <div t-if="this.foo!==1">
         Con meo
     </div>
-    Con {{this.foo}} heo
-    <div></div>
-    <div class="abc"></div>
+    Con {{this.foo}} heo {{this.foo + 1}}
+    <div t-for="item in this.array">Con ca heo {{this}}</div>
 </div>
 <script src="app.js"></script>
 </body>

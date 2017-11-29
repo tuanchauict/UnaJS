@@ -1,11 +1,9 @@
-
-
-function parseHtml(html){
+function parseHtml(html) {
     var TYPE_TEXT = 0;
     var TYPE_NODE = 1;
 
 
-    function Node(){
+    function Node() {
         var me = this;
         this.name = '';
         this.type = TYPE_TEXT;
@@ -16,107 +14,109 @@ function parseHtml(html){
         this.attributes = {};
 
 
-        this.toHtml = function(context){
-            console.log('toHtml',this, context);
+        this.toHtml = function (context) {
             if (this.isIfNode && !evalContext(this.ifNode, context)) {
-                return '';
+                return null;
             }
-            if (this.isForNode){
+
+            if (this.isForNode) {
                 return renderFor(context);
             }
 
             if (this.type === TYPE_TEXT) {
-                return renderText( context);
+                return renderText(context);
             }
 
             return renderNode(context);
         };
 
         var renderFor = function (context) {
-            return '';
+            var result = [];
+            result.array = true;
+            var arr = me.forNode.split(/\s+in\s+/);
+            var data = evalContext(arr[1], context);
+
+            me.isForNode = false;
+            for (var i = 0; i < data.length; i++){
+                result.push(me.toHtml(data[i]))
+            }
+            me.isForNode = true;
+            return result;
         };
 
         var renderText = function (context) {
             var text = me.text;
-            var l = text.length;
-            var result = '';
-            for (var i = 0; i < l; i++) {
-                var c = text[i];
-                var c1 = i < l - 1 ? text[i+1] : '';
-                if (c + c1 === '{{') {
-                    var j = i + 2;
-                    var js = '';
-                    for (; j < l; j++) {
-                        c = text[j];
-                        c1 = j < l - 1 ? text[j+1] : '';
-                        if (c + c1 === '}}') {
-                            result += evalContext(js, context);
-                            i = j + 1;
-                        } else {
-                            js += c;
-                        }
-                    }
-                } else {
-                    result += c;
+
+            var re = /{{.+?}}/g;
+            var map = {};
+            var arr = text.match(re);
+            if (!arr){
+                return document.createTextNode(text);
+            }
+            for (var i = 0; i < arr.length; i++){
+                js = arr[i];
+                if (!(js in map)) {
+                    var value = evalContext(js.substr(2, js.length - 4), context);
+                    map[js] = value;
+                    text = text.replace(js, value);
                 }
             }
-            return result;
+
+            return document.createTextNode(text);
         };
 
         var renderNode = function (context) {
-            console.log("renderNode", context);
-            var attrs = '';
-            for (var k in me.attributes){
+            var element = document.createElement(me.name);
+            for (var k in me.attributes) {
                 if (!me.attributes.hasOwnProperty(k))
                     continue;
-                attrs += k + '="' + me.attributes[k] + '"';
+                element.setAttribute(k, me.attributes[k]);
             }
             // TODO render tAttribute
-            var children = '';
-            for (var i = 0; i < me.children.length; i++){
-                children += me.children[i].toHtml(context);
-            }
-            attrs = attrs.trim();
-            children = children.trim();
-            if (children) {
-                if (attrs) {
-                    return '<{0} {1}>{2}</{0}>'.format(me.name, attrs, children);
-                } else {
-                    return '<{0}>{1}</{0}>'.format(me.name, children);
+            for (var i = 0; i < me.children.length; i++) {
+                var childElem = me.children[i].toHtml(context);
+
+                if (childElem) {
+                    if ('array' in childElem){
+                        console.log(childElem);
+                        for (var j = 0; j < childElem.length; j++){
+                            element.appendChild(childElem[j]);
+                        }
+                    } else {
+                        element.appendChild(childElem);
+                    }
                 }
-            } else if(attrs) {
-                return '<{0} {1}/>'.format(me.name, attrs);
-            } else {
-                return '<{0}/>'.format(me.name);
+
             }
+            return element;
         };
 
     }
 
 
-    var run = function() {
+    var run = function () {
         var domParser = new DOMParser();
         var dom = domParser.parseFromString(html, 'text/html');
         dom = dom.children[0].children[1].children[0];
         return parse(dom);
     };
 
-    var parse = function(dom){
+    var parse = function (dom) {
         var node = new Node();
         node.type = dom.nodeType === 3 ? TYPE_TEXT : TYPE_NODE;
-        if (node.type === TYPE_NODE){
+        if (node.type === TYPE_NODE) {
             node.name = dom.nodeName;
             node.isIfNode = dom.hasAttribute('t-if');
             node.isForNode = dom.hasAttribute('t-for');
             node.ifNode = dom.getAttribute('t-if');
-            node.forNode = dom.hasAttribute('t-for');
+            node.forNode = dom.getAttribute('t-for');
             var attrs = dom.attributes;
             var attr;
             var name;
-            for (var i = 0, l = attrs.length; i < l; i++){
+            for (var i = 0, l = attrs.length; i < l; i++) {
                 attr = attrs[i];
                 name = attr.name;
-                if (name.startsWith('t-')){
+                if (name.startsWith('t-')) {
                     if (name !== 't-if' && name !== 't-for') {
                         node.tAttributes[name] = attr.value;
                     }
@@ -128,7 +128,7 @@ function parseHtml(html){
             var cs = dom.childNodes;
             // console.log(cs);
             var children = [];
-            for (var i = 0, l = cs.length; i < l; i++){
+            for (var i = 0, l = cs.length; i < l; i++) {
                 children.push(parse(cs[i]));
             }
             node.children = children;
