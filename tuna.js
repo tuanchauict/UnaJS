@@ -6,6 +6,7 @@ function Tuna(information){
         me.$el = document.getElementById(information.el);
         me.$code = '<' + me.$el.nodeName + '>' + me.$el.innerHTML + '</' + me.$el.nodeName + '>';
         me.$tree = parseHtml(me.$code);
+        me.$methods = information.methods;
 
         me.$data = {};
         var data = information.data;
@@ -23,7 +24,7 @@ function Tuna(information){
     }
 
     function updateView(){
-        var newDOM = me.$tree.toDOM(me.$data, null);
+        var newDOM = me.$tree.toDOM({data: me.$data, methods: me.$methods}, null);
         console.log(newDOM);
         //TODO
 

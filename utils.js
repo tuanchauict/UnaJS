@@ -60,7 +60,8 @@ if (!String.prototype.format) {
 function evalContext(js, globalContext, localContext) {
     return function () {
         var s = "";
-        var g = this.global;
+        var g = this.global.data;
+        var m = this.global.methods;
         var l = this.local;
         for (var k in g) {
             if (!g.hasOwnProperty(k)) continue;
@@ -70,6 +71,10 @@ function evalContext(js, globalContext, localContext) {
             } else {
                 s += "var " + k + "=" + v + ";";
             }
+        }
+        for (var k in m){
+            if (!m.hasOwnProperty(k)) continue;
+            s += "var " + k + "=" + m[k] + ";";
         }
 
         if (l) {

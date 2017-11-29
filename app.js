@@ -5,7 +5,9 @@ var app = new Tuna({
         array: [100, 200, 300]
     },
     methods: {
-
+        bar: function(){
+            return 1000;
+        }
     }
 });
 

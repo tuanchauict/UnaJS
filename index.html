@@ -10,10 +10,10 @@
 <body>
 <div id="app">
     <div t-if="foo===1">
-        Con heo
+        Con heo {{bar()}}
     </div>
     <div t-if="foo!==1">
-        Con meo
+        Con meo {{bar()}}
     </div>
     Con {{foo}} heo {{foo + 1}}
     <div t-for="index, item in array">{{index}} - Con ca heo {{item}}</div>
