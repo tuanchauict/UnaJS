@@ -9,14 +9,14 @@
 </head>
 <body>
 <div id="app">
-    <div t-if="foo===1">
+    <div u-if="foo===1">
         Con heo {{bar()}}
     </div>
-    <div t-if="foo!==1">
+    <div u-if="foo!==1">
         Con meo {{bar()}}
     </div>
     Con {{foo}} heo {{foo + 1}}
-    <div t-for="index, item in array"><span>{{index}} - Con ca heo {{item}}</span></div>
+    <div u-for="index, item in array"><span>{{index}} - Con ca heo {{item}}</span></div>
 </div>
 <script src="app.js"></script>
 </body>

@@ -131,18 +131,18 @@ function parseHtml(html) {
         node.type = dom.nodeType === 3 ? TYPE_TEXT : TYPE_NODE;
         if (node.type === TYPE_NODE) {
             node.name = dom.nodeName;
-            node.isIfNode = dom.hasAttribute('t-if');
-            node.isForNode = dom.hasAttribute('t-for');
-            node.ifNode = dom.getAttribute('t-if');
-            node.forNode = dom.getAttribute('t-for');
+            node.isIfNode = dom.hasAttribute('u-if');
+            node.isForNode = dom.hasAttribute('u-for');
+            node.ifNode = dom.getAttribute('u-if');
+            node.forNode = dom.getAttribute('u-for');
             var attrs = dom.attributes;
             var attr;
             var name;
             for (var i = 0, l = attrs.length; i < l; i++) {
                 attr = attrs[i];
                 name = attr.name;
-                if (name.startsWith('t-')) {
-                    if (name !== 't-if' && name !== 't-for') {
+                if (name.startsWith('u-')) {
+                    if (name !== 'u-if' && name !== 'u-for') {
                         node.tAttributes[name] = attr.value;
                     }
                 } else {
