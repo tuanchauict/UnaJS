@@ -1,4 +1,4 @@
-var app = new Tuna({
+var app = new Una({
     el: 'app',
     data: {
         foo: 1,

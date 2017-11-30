@@ -1,5 +1,5 @@
 
-function Tuna(information){
+function Una(information){
     var me = this;
 
     function init(information){
