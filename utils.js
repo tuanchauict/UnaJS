@@ -79,7 +79,7 @@ function evalContext(js, globalContext, localContext) {
             }
         }
         s += js;
-        console.log(s);
+        // console.log(s);
         return eval(s);
     }.call({global: globalContext, local: localContext});
 }

@@ -9,21 +9,21 @@
 </head>
 <body>
 <div id="app">
-    <!--<div u-if="foo % 2 === 0">-->
-        <!--Con heo {{bar()}}-->
-    <!--</div>-->
-    <!--<div u-if="foo % 2 !== 0">-->
-        <!--Con meo {{bar()}}-->
-    <!--</div>-->
-    <!--<div>-->
-        <!--<button u-click="onClick()">Click me</button>-->
-    <!--</div>-->
-    <!--Con {{foo}} heo {{foo + 1}}-->
-    <!--<ul>-->
-        <!--<li u-for="index, item in array" u-click="onItemClick(item)">-->
-            <!--<span>{{index}} - Con ca heo {{item}}</span>-->
-        <!--</li>-->
-    <!--</ul>-->
+    <div u-if="foo % 2 === 0">
+        Con heo {{bar()}}
+    </div>
+    <div u-if="foo % 2 !== 0">
+        Con meo {{bar()}}
+    </div>
+    <div>
+        <button u-click="onClick()">Click me</button>
+    </div>
+    Con {{foo}} heo {{foo + 1}}
+    <ul>
+        <li u-for="index, item in array" u-click="onItemClick(item)">
+            <span>{{index}} - Con ca heo {{item}}</span>
+        </li>
+    </ul>
     <div>
         <input u-bind="input.text" type="text"/>
     </div>
