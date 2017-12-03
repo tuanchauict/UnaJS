@@ -1,3 +1,12 @@
+if (!Array.prototype.remove) {
+    Array.prototype.remove = function(item){
+        var index = this.indexOf(item);
+        if (index >= 0){
+            this.splice(index, 1);
+        }
+    }
+}
+
 // object.watch
 if (!Object.prototype.watch) {
     Object.defineProperty(Object.prototype, "watch", {
@@ -57,6 +66,16 @@ if (!String.prototype.format) {
     };
 }
 
+
+function guid() {
+    if (!this.counter){
+        this.counter = 0;
+    }
+    this.counter++;
+    return '#' + this.counter;
+}
+
+
 function evalContext(js, globalContext, localContext) {
     return function () {
         var s = "";
@@ -69,7 +88,7 @@ function evalContext(js, globalContext, localContext) {
         }
         for (var k in m) {
             if (!m.hasOwnProperty(k)) continue;
-            s += "var {0} = m.{0};".format(k);
+            s += "var {0} = m.{0}.bind(g);".format(k);
         }
 
         if (l) {
@@ -82,4 +101,22 @@ function evalContext(js, globalContext, localContext) {
         // console.log(s);
         return eval(s);
     }.call({global: globalContext, local: localContext});
+}
+
+function evalText(text, globalContext, localContext) {
+    var re = /{{.+?}}/g;
+    var map = {};
+    var arr = text.match(re);
+    if (!arr){
+        return text;
+    }
+    for (var i = 0; i < arr.length; i++){
+        js = arr[i];
+        if (!(js in map)) {
+            var value = evalContext(js.substr(2, js.length - 4),globalContext,  localContext);
+            map[js] = value;
+            text = text.replace(js, value);
+        }
+    }
+    return text;
 }

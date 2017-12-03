@@ -1,55 +1,88 @@
-
-function Una(information){
+function Una(information) {
     var me = this;
 
-    function init(information){
+    function init(information) {
         me.$el = document.getElementById(information.el);
         me.$code = '<' + me.$el.nodeName + '>' + me.$el.innerHTML + '</' + me.$el.nodeName + '>';
         me.$tree = parseHtml(me.$code);
         me.$methods = information.methods;
-
-        me.$data = {};
-        var data = information.data;
-        var $data = me.$data;
-        for (var k in data){
-            if (!(data.hasOwnProperty(k))){
-                continue;
+        me.$nodes = {
+            counter: 0,
+            nodes: {},
+            update: function(path, node){
+                this.nodes[path] = {
+                    counter: this.counter,
+                    node: node
+                }
+            },
+            get: function (path) {
+                return path in this.nodes ? this.nodes[path].node : null;
+            },
+            beginUpdate: function(){
+                this.counter++;
+            },
+            endUpdate: function() {
+                for (var k in this.nodes){
+                    if (this.nodes[k].counter < this.counter){
+                        this.nodes[k].node.remove();
+                        delete this.nodes[k];
+                    }
+                }
             }
+        };
 
-            $data[k] = data[k];
-            $data.watch(k, function(prop, old, val){
-                // console.log(prop, old, val);
-                updateView();
-            });
+        function watch(obj) {
+            if (Array.isArray(obj)) {
+                obj.push = function(){
+                    var beforeLength = obj.length;
+                    Array.prototype.push.apply(this, arguments);
+                    updateView();
+                    for (var i = beforeLength; i < obj.length; i++){
+                        obj.watch(i, updateView);
+                        if (typeof obj[i] === 'object')
+                            watch(obj[i])
+                    }
+                };
+                obj.remove = function (item) {
+                    // var index = obj.indexOf(item);
+                    // if (index >= 0){
+                    //     obj.splice(index, 1);
+                    // }
+                    Array.prototype.remove.apply(this, arguments);
+                    updateView();
+                };
 
-            if (typeof data[k] === 'object') {
-                if (!Array.isArray(data[k])){
-                    var datak = $data[k];
-                    for (var kk in datak) {
-                        // console.log(kk);
-                        // if (!datak.hasOwnProperty(k)) continue;
-                        datak.watch(kk, function (prop, old, val) {
-                            updateView();
-                            console.log('con heo');
-                        })
+                obj.pop = function () {
+                    Array.prototype.pop.apply(this, arguments);
+                    updateView();
+                };
+
+                for (var i = 0; i < obj.length; i++) {
+                    obj.watch(i, updateView);
+                    if (typeof obj[i] === 'object')
+                        watch(obj[i])
+                }
+            } else {
+                for (var k in obj) {
+                    if (!obj.hasOwnProperty(k)) continue;
+                    obj.watch(k, updateView);
+                    if (typeof obj[k] === 'object') {
+                        watch(obj[k]);
                     }
                 }
             }
         }
 
+        me.$data = JSON.parse(JSON.stringify(information.data));
+        watch(me.$data);
+        me.$el.innerHTML = '';
         updateView();
     }
 
-    function updateView(){
-        var newDOM = me.$tree.toDOM({data: me.$data, methods: me.$methods}, null);
-        console.log(newDOM);
-        //TODO
-        me.$el.innerHTML = '';
-        me.$el.appendChild(newDOM);
-        // for(var i = 0; i < newDOM.childNodes.length; i++){
-        //     console.log(newDOM.childNodes[i]);
-        //     me.$el.appendChild(newDOM.childNodes[i]);
-        // }
+    function updateView(prop, old, val) {
+        me.$nodes.beginUpdate();
+        me.$tree.toDOM(me.$nodes, '', me.$el, {data: me.$data, methods: me.$methods}, null);
+        me.$nodes.endUpdate();
     }
 
 
