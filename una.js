@@ -1,6 +1,7 @@
 function Una(information) {
     var me = this;
 
+
     function init(information) {
         me.$el = document.getElementById(information.el);
         me.$code = '<' + me.$el.nodeName + '>' + me.$el.innerHTML + '</' + me.$el.nodeName + '>';
@@ -9,7 +10,7 @@ function Una(information) {
         me.$nodes = {
             counter: 0,
             nodes: {},
-            update: function(path, node){
+            update: function (path, node) {
                 this.nodes[path] = {
                     counter: this.counter,
                     node: node
@@ -18,12 +19,12 @@ function Una(information) {
             get: function (path) {
                 return path in this.nodes ? this.nodes[path].node : null;
             },
-            beginUpdate: function(){
+            beginUpdate: function () {
                 this.counter++;
             },
-            endUpdate: function() {
-                for (var k in this.nodes){
-                    if (this.nodes[k].counter < this.counter){
+            endUpdate: function () {
+                for (var k in this.nodes) {
+                    if (this.nodes[k].counter < this.counter) {
                         this.nodes[k].node.remove();
                         delete this.nodes[k];
                     }
@@ -33,11 +34,11 @@ function Una(information) {
 
         function watch(obj) {
             if (Array.isArray(obj)) {
-                obj.push = function(){
+                obj.push = function () {
                     var beforeLength = obj.length;
                     Array.prototype.push.apply(this, arguments);
                     updateView();
-                    for (var i = beforeLength; i < obj.length; i++){
+                    for (var i = beforeLength; i < obj.length; i++) {
                         obj.watch(i, updateView);
                         if (typeof obj[i] === 'object')
                             watch(obj[i])
@@ -85,9 +86,13 @@ function Una(information) {
         me.$nodes.endUpdate();
     }
 
-
     init(information);
 }
 
+Una.$components = {};
+
+Una.component = function (name, information) {
+    Una.$components[name] = new Component(information);
+};
 
 
