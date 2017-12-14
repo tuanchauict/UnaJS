@@ -1,6 +1,6 @@
 function parseHtml(html) {
-    var TYPE_TEXT = 0;
-    var TYPE_NODE = 1;
+    const TYPE_TEXT = 0;
+    const TYPE_NODE = 1;
 
     function Node() {
         var me = this;
@@ -16,11 +16,11 @@ function parseHtml(html) {
         this.toDOM = function (nodes, parentPath, parentElement, globalContext, context) {
             // console.log(parentElement);
             if (this.isIfNode && !evalContext(this.ifNode, globalContext, context)) {
-                var path = parentPath + this.id;
+                const path = parentPath + this.id;
                 var node = nodes.get(path);
                 if (node) {
                     if (node.nodeType !== 8) {
-                        var cmt = document.createComment('if');
+                        const cmt = document.createComment('if');
                         parentElement.insertBefore(cmt, node);
                         node.remove();
                         node = cmt;
@@ -33,22 +33,26 @@ function parseHtml(html) {
             } else if (this.isForNode) {
                 return renderFor(nodes, parentPath, parentElement, globalContext, context);
             } else {
-                var path = parentPath + this.id;
+                const path = parentPath + this.id;
 
                 if (this.type === TYPE_TEXT) {
                     renderText(nodes, path, parentElement, globalContext, context);
                 } else {
-                    renderNode(nodes, path, parentElement, globalContext, context);
+                    if (Una.$components.hasOwnProperty(this.name)){
+                        renderComponent(nodes, parentPath, parentElement, globalContext, context);
+                    } else {
+                        renderHTMLNode(nodes, path, parentElement, globalContext, context);
+                    }
                 }
             }
         };
 
-        var renderFor = function (nodes, parentPath, parentElement, globalContext, context) {
+        const renderFor = function (nodes, parentPath, parentElement, globalContext, context) {
             var result = [];
             result.array = true;
-            var arr = me.forNode.split(/\s+in\s+/);
-            var data = evalContext(arr[1], globalContext, context);
-            var indexes = arr[0].split(',');
+            const arr = me.forNode.split(/\s+in\s+/);
+            const data = evalContext(arr[1], globalContext, context);
+            const indexes = arr[0].split(',');
             var keyIndex = '';
             var keyItem = '';
             if (indexes.length === 2) {
@@ -58,10 +62,9 @@ function parseHtml(html) {
                 keyItem = indexes[0].trim();
             }
 
-
             me.isForNode = false;
             for (var i = 0; i < data.length; i++) {
-                var localContext = {};
+                const localContext = {};
                 if (context) {
                     for (var k in context) {
                         if (context.hasOwnProperty(k)) {
@@ -79,7 +82,7 @@ function parseHtml(html) {
             me.isForNode = true;
         };
 
-        var renderText = function (nodes, path, parentElement, globalContext, context) {
+        const renderText = function (nodes, path, parentElement, globalContext, context) {
             var text = evalText(me.text, globalContext, context);
             var node = nodes.get(path);
             if (node) {
@@ -91,9 +94,9 @@ function parseHtml(html) {
             nodes.update(path, node);
         };
 
-        var renderNode = function (nodes, path, parentElement, globalContext, context) {
+        const renderHTMLNode = function (nodes, path, parentElement, globalContext, context) {
             var element = nodes.get(path);
-            if (element && element.nodeType != 8) {
+            if (element && element.nodeType !== 8) {
 
             } else {
                 element = document.createElement(me.name);
@@ -122,9 +125,9 @@ function parseHtml(html) {
             if (me.uAttributes.hasOwnProperty('u-bind')) {
                 var binder = me.uAttributes['u-bind'];
                 var inputType = element.type;
-                if (inputType === 'checkbox' || inputType === 'radio' ){
+                if (inputType === 'checkbox' || inputType === 'radio') {
                     element.checked = evalContext(binder, globalContext, context);
-                    element.onchange = function(){
+                    element.onchange = function () {
                         var js;
                         if (binder.indexOf('.') >= 0) {
                             js = '{0} = {1}'.format(binder, element.checked);
@@ -140,7 +143,7 @@ function parseHtml(html) {
                     }
                 } else {
                     element.value = evalContext(binder, globalContext, context);
-                    var run = function (e) {
+                    var run = function () {
                         var js;
                         if (binder.indexOf('.') >= 0) {
                             js = '{0} = {1}'.format(binder, JSON.stringify(element.value));
@@ -162,6 +165,10 @@ function parseHtml(html) {
             for (var i = 0; i < me.children.length; i++) {
                 me.children[i].toDOM(nodes, path, element, globalContext, context);
             }
+        };
+
+        const renderComponent = function(nodes, path, parentElement, globalContext, context){
+
         };
     }
 
