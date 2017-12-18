@@ -82,7 +82,7 @@ function Una(information) {
 
     function updateView(prop, old, val) {
         me.$nodes.beginUpdate();
-        me.$tree.toDOM(me.$nodes, '', me.$el, {data: me.$data, methods: me.$methods}, null);
+        me.$tree.toDOM(me.$nodes, '', me.$el, {global: {data: me.$data, methods: me.$methods}});
         me.$nodes.endUpdate();
     }
 
@@ -92,7 +92,7 @@ function Una(information) {
 Una.$components = {};
 
 Una.component = function (name, information) {
-    Una.$components[name] = new Component(information);
+    Una.$components[name.toLowerCase()] = new Component(information);
 };
 
 

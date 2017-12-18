@@ -13,5 +13,9 @@ function Component(information) {
         }
     }
 
+    this.toHTML = function (nodes, parentPath, parentElement, contexts) {
+        me.$tree.toDOM(nodes, parentPath, parentElement, contexts);
+    };
+
     init(information);
 }

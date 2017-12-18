@@ -12,10 +12,11 @@ function parseHtml(html) {
         this.children = [];
         this.uAttributes = {};
         this.attributes = {};
+        this.properties = {};
 
-        this.toDOM = function (nodes, parentPath, parentElement, globalContext, context) {
+        this.toDOM = function (nodes, parentPath, parentElement, contexts) {
             // console.log(parentElement);
-            if (this.isIfNode && !evalContext(this.ifNode, globalContext, context)) {
+            if (this.isIfNode && !evalContext(this.ifNode, contexts.global, contexts.local)) {
                 const path = parentPath + this.id;
                 let node = nodes.get(path);
                 if (node) {
@@ -31,27 +32,29 @@ function parseHtml(html) {
                 }
                 nodes.update(path, node);
             } else if (this.isForNode) {
-                return renderFor(nodes, parentPath, parentElement, globalContext, context);
+                return renderFor(nodes, parentPath, parentElement, contexts);
             } else {
                 const path = parentPath + this.id;
 
                 if (this.type === TYPE_TEXT) {
-                    renderText(nodes, path, parentElement, globalContext, context);
+                    renderText(nodes, path, parentElement, contexts);
                 } else {
-                    if (Una.$components.hasOwnProperty(this.name)){
-                        renderComponent(nodes, parentPath, parentElement, globalContext, context);
+                    if (this.name.toLocaleLowerCase() === 'slot') {
+                        renderComponentChildren(nodes, parentPath, parentElement, contexts);
+                    } else if (this.name.toLowerCase() in Una.$components) {
+                        renderComponent(nodes, parentPath, parentElement, contexts);
                     } else {
-                        renderHTMLNode(nodes, path, parentElement, globalContext, context);
+                        renderHTMLNode(nodes, path, parentElement, contexts);
                     }
                 }
             }
         };
 
-        const renderFor = function (nodes, parentPath, parentElement, globalContext, context) {
+        const renderFor = function (nodes, parentPath, parentElement, contexts) {
             let result = [];
             result.array = true;
             const arr = me.forNode.split(/\s+in\s+/);
-            const data = evalContext(arr[1], globalContext, context);
+            const data = evalContext(arr[1], contexts.global, contexts.local);
             const indexes = arr[0].split(',');
             let keyIndex = '';
             let keyItem = '';
@@ -63,6 +66,7 @@ function parseHtml(html) {
             }
 
             me.isForNode = false;
+            const context = contexts.local;
             for (let i = 0; i < data.length; i++) {
                 const localContext = {};
                 if (context) {
@@ -76,14 +80,14 @@ function parseHtml(html) {
                 if (keyIndex) {
                     localContext[keyIndex] = i;
                 }
-
-                result.push(me.toDOM(nodes, parentPath + '-' + i, parentElement, globalContext, localContext))
+                contexts.local = localContext;
+                result.push(me.toDOM(nodes, parentPath + '-' + i, parentElement, contexts))
             }
             me.isForNode = true;
         };
 
-        const renderText = function (nodes, path, parentElement, globalContext, context) {
-            let text = evalText(me.text, globalContext, context);
+        const renderText = function (nodes, path, parentElement, contexts) {
+            let text = evalText(me.text, contexts.global, contexts.local);
             let node = nodes.get(path);
             if (node) {
                 node.nodeValue = text;
@@ -94,7 +98,7 @@ function parseHtml(html) {
             nodes.update(path, node);
         };
 
-        const renderHTMLNode = function (nodes, path, parentElement, globalContext, context) {
+        const renderHTMLNode = function (nodes, path, parentElement, contexts) {
             let element = nodes.get(path);
             if (element && element.nodeType !== 8) {
 
@@ -113,20 +117,20 @@ function parseHtml(html) {
                 if (!me.attributes.hasOwnProperty(k))
                     continue;
 
-                element.setAttribute(k, evalText(me.attributes[k], globalContext, context));
+                element.setAttribute(k, evalText(me.attributes[k], contexts.global, contexts.local));
             }
 
             if (me.uAttributes.hasOwnProperty('u-click')) {
                 element.onclick = function () {
-                    evalContext(me.uAttributes['u-click'], globalContext, context);
-                    // console.log('click');
+                    evalContext(me.uAttributes['u-click'], contexts.global, contexts.local);
                 }
             }
+            const context = contexts.local;
             if (me.uAttributes.hasOwnProperty('u-bind')) {
                 let binder = me.uAttributes['u-bind'];
                 let inputType = element.type;
                 if (inputType === 'checkbox' || inputType === 'radio') {
-                    element.checked = evalContext(binder, globalContext, context);
+                    element.checked = evalContext(binder, contexts.global, contexts.local);
                     element.onchange = function () {
                         let js;
                         if (binder.indexOf('.') >= 0) {
@@ -139,10 +143,10 @@ function parseHtml(html) {
                             }
                         }
 
-                        evalContext(js, globalContext, context);
+                        evalContext(js, contexts.global, contexts.local);
                     }
                 } else {
-                    element.value = evalContext(binder, globalContext, context);
+                    element.value = evalContext(binder, contexts.global, contexts.local);
                     let run = function () {
                         let js;
                         if (binder.indexOf('.') >= 0) {
@@ -155,21 +159,57 @@ function parseHtml(html) {
                             }
                         }
 
-                        evalContext(js, globalContext, context);
+                        evalContext(js, contexts.global, contexts.local);
                     };
                     element.onchange = run;
                     element.onkeyup = run;
                 }
             }
             // TODO render more uAttribute
-            for (let i = 0; i < me.children.length; i++) {
-                me.children[i].toDOM(nodes, path, element, globalContext, context);
-            }
+
+            // for (let i = 0; i < me.children.length; i++) {
+            //     me.children[i].toDOM(nodes, path, element, contexts);
+            // }
+            renderChildren(nodes, path, element, contexts, me.children);
         };
 
-        const renderComponent = function(nodes, path, parentElement, globalContext, context){
+        const renderComponent = function (nodes, parentPath, parentElement, contexts) {
+            console.log('component', me.name, me);
+            const path = parentPath + me.name + me.id;
             console.log(path);
+            console.log(contexts);
+            const componentContext = {data: {}, method: {}};
+            for (let k in me.properties){
+                let p = me.properties[k];
+
+                if (typeof p === 'function') {
+                    componentContext.method[k] = p;
+                }  else {
+                    componentContext.data[k] = evalText(p, contexts.global, contexts.local);;
+                }
+            }
+
+            Una.$components[me.name.toLocaleLowerCase()].toHTML(nodes, path, parentElement, {
+                global: componentContext,
+                local: contexts.local,
+                parent: contexts.global,
+                children: me.children
+            });
         };
+
+        const renderComponentChildren = function (nodes, parentPath, parentElement, contexts) {
+            console.log("renderComponentChildren", contexts);
+            const children = contexts.children;
+            console.log(children);
+        };
+
+        const renderChildren = function(nodes, parentPath, parentElement, contexts, children) {
+            if (!children)
+                return;
+            for (let i = 0; i < children.length; i++) {
+                children[i].toDOM(nodes, parentPath, parentElement, contexts);
+            }
+        }
     }
 
 
@@ -202,7 +242,11 @@ function parseHtml(html) {
                     if (name !== 'u-if' && name !== 'u-for') {
                         node.uAttributes[name] = attr.value;
                     }
-                } else {
+                }
+                if (name.startsWith('u:')) {
+                    node.properties[name.substr(2)] = attr.value;
+                }
+                else {
                     node.attributes[name] = attr.value;
                 }
             }
