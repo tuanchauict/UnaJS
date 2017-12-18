@@ -4,19 +4,33 @@
     <meta charset="UTF-8">
     <title>Sample</title>
     <script src="../utils.js"></script>
+    <script src="../component.js"></script>
     <script src="../parser2.js"></script>
     <script src="../una.js"></script>
 </head>
 <body>
 <div id="app">
-
+    <div>Con ca keo</div>
+    <abc></abc>
 </div>
 <script type="text/x-template" id="demo-template">
-<div>Con heo</div>
+    <div>Con heo</div>
 </script>
 
 <script>
+    Una.component('abc', {
+        template: '#demo-template'
+    });
 
+    var app = new Una({
+        el: 'app',
+        data: {
+
+        },
+        method: {
+
+        }
+    })
 </script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 function Una(information) {
-    var me = this;
+    const me = this;
 
 
     function init(information) {
@@ -23,7 +23,7 @@ function Una(information) {
                 this.counter++;
             },
             endUpdate: function () {
-                for (var k in this.nodes) {
+                for (let k in this.nodes) {
                     if (this.nodes[k].counter < this.counter) {
                         this.nodes[k].node.remove();
                         delete this.nodes[k];
@@ -58,13 +58,13 @@ function Una(information) {
                     updateView();
                 };
 
-                for (var i = 0; i < obj.length; i++) {
+                for (let i = 0; i < obj.length; i++) {
                     obj.watch(i, updateView);
                     if (typeof obj[i] === 'object')
                         watch(obj[i])
                 }
             } else {
-                for (var k in obj) {
+                for (let k in obj) {
                     if (!obj.hasOwnProperty(k)) continue;
                     obj.watch(k, updateView);
                     if (typeof obj[k] === 'object') {
