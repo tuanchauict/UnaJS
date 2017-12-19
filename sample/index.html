@@ -11,12 +11,16 @@
 <body>
 <div id="app">
     <div>Con ca keo va {{bar}}</div>
-    <abc u:foo="{{bar}} di choi"></abc>
+    <abc u:foo="{{bar}} di choi">
+        mot hai ba {{baz}}
+        <abc u:foo="met qua">{{bazz}}</abc>
+    </abc>
 </div>
 <script type="text/x-template" id="demo-template">
     <div>
         <div>Con heo</div>
         <div>abc {{foo}}</div>
+        <content/>
     </div>
 </script>
 
@@ -26,10 +30,12 @@
         props: ['foo']
     });
 
-    var app = new Una({
+    const app = new Una({
         el: 'app',
         data: {
-            bar: 'Con vit'
+            bar: 'Con vit',
+            baz: 'Con ga',
+            bazz: 'AAAAAA'
         },
         method: {
 

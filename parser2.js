@@ -39,7 +39,7 @@ function parseHtml(html) {
                 if (this.type === TYPE_TEXT) {
                     renderText(nodes, path, parentElement, contexts);
                 } else {
-                    if (this.name.toLocaleLowerCase() === 'slot') {
+                    if (this.name.toLocaleLowerCase() === 'content') {
                         renderComponentChildren(nodes, parentPath, parentElement, contexts);
                     } else if (this.name.toLowerCase() in Una.$components) {
                         renderComponent(nodes, parentPath, parentElement, contexts);
@@ -185,22 +185,28 @@ function parseHtml(html) {
                 if (typeof p === 'function') {
                     componentContext.method[k] = p;
                 }  else {
-                    componentContext.data[k] = evalText(p, contexts.global, contexts.local);;
+                    componentContext.data[k] = evalText(p, contexts.global, contexts.local);
                 }
             }
 
             Una.$components[me.name.toLocaleLowerCase()].toHTML(nodes, path, parentElement, {
                 global: componentContext,
                 local: contexts.local,
-                parent: contexts.global,
-                children: me.children
+                children: {
+                    nodes: me.children,
+                    contexts
+                }
             });
         };
 
         const renderComponentChildren = function (nodes, parentPath, parentElement, contexts) {
             console.log("renderComponentChildren", contexts);
-            const children = contexts.children;
+            console.log(contexts.children);
+            const children = contexts.children.nodes;
+
             console.log(children);
+            renderChildren(nodes, parentPath, parentElement, contexts.children.contexts, contexts.children.nodes);
+
         };
 
         const renderChildren = function(nodes, parentPath, parentElement, contexts, children) {
@@ -211,7 +217,6 @@ function parseHtml(html) {
             }
         }
     }
-
 
     const run = function (html) {
         let domParser = new DOMParser();
