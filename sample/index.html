@@ -10,22 +10,23 @@
 </head>
 <body>
 <div id="app">
-    <div>Con ca keo va {{bar}}</div>
-    <abc u:foo="{{bar}} di choi" u:abc="abc">
-        mot hai ba {{baz}}
-    </abc>
+    <ul>
+        <li u-for="i, item in arr" u-click="onClick(i)">{{item}} Click me</li>
+    </ul>
+    <div u-if="index===0">Index 1</div>
+    <div u-if="index===1">Index 2</div>
+    <div>Co dinh</div>
 </div>
-<script type="text/x-template" id="demo-template">
-    <div>
-        <div>Con heo</div>
-        <div>abc {{foo}} {{a}}</div>
-        <content/>
-    </div>
-</script>
+
+
 
 <script>
     Una.component('abc', {
-        template: '#demo-template',
+        template: `
+<div>
+    <!--<div>Con heo</div>-->
+    <content/>
+</div>`,
         props: ['foo', 'abc'],
         data: {
             a: 1
@@ -36,12 +37,14 @@
         el: 'app',
         data: {
             bar: 'Con vit',
-            baz: 'Con ga',
-            bazz: 'AAAAAA'
+            index: 0,
+            arr: [
+                1, 2
+            ]
         },
-        method: {
-            abc: function (data) {
-                console.log(data);
+        methods: {
+            onClick: function (index) {
+                this.index = index;
             }
         }
     })

@@ -67,6 +67,9 @@ function parseHtml(html) {
 
             me.isForNode = false;
             const context = contexts.local;
+            console.log(context);
+
+            console.log(data);
             for (let i = 0; i < data.length; i++) {
                 const localContext = {};
                 if (context) {
@@ -81,7 +84,11 @@ function parseHtml(html) {
                     localContext[keyIndex] = i;
                 }
                 contexts.local = localContext;
-                result.push(me.toDOM(nodes, parentPath + '-' + i, parentElement, contexts))
+                const newContexts = {};
+                Object.assign(newContexts, contexts);
+                newContexts.local = localContext;
+
+                result.push(me.toDOM(nodes, parentPath + '-' + i, parentElement, newContexts))
             }
             me.isForNode = true;
         };
