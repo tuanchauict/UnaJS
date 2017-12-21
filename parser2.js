@@ -178,7 +178,7 @@ function parseHtml(html) {
             const path = parentPath + me.name + me.id;
             console.log(path);
             console.log(contexts);
-            const componentContext = {data: {}, method: {}};
+            const componentContext = {data: {}, methods: {}};
             for (let k in me.properties){
                 let p = me.properties[k];
 
