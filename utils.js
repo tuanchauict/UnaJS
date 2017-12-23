@@ -82,19 +82,36 @@ function evalContext(js, globalContext, localContext) {
         const g = this.global.data;
         const m = this.global.methods;
         const l = this.local;
+        const set = new Set();
+
         for (let k in g) {
             if (!g.hasOwnProperty(k)) continue;
-            s += "let {0} = g.{0};".format(k);
+            if (set.has(k)){
+                s += "{0} = g.{0};".format(k);
+            } else {
+                s += "let {0} = g.{0};".format(k);
+                set.add(k);
+            }
         }
         for (let k in m) {
             if (!m.hasOwnProperty(k)) continue;
-            s += "var {0} = m.{0}.bind(g);".format(k);
+            if (set.has(k)){
+                s += "{0} = m.{0}.bind(g);".format(k);
+            } else {
+                s += "let {0} = m.{0}.bind(g);".format(k);
+                set.add(k);
+            }
         }
 
         if (l) {
             for (let k in l) {
                 if (!l.hasOwnProperty(k)) continue;
-                s += "var {0} = l.{0};".format(k);
+                if (set.has(k)){
+                    s += "{0} = l.{0};".format(k);
+                } else {
+                    s += "let {0} = l.{0};".format(k);
+                    set.add(k);
+                }
             }
         }
         s += js;

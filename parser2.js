@@ -13,6 +13,7 @@ function parseHtml(html) {
         this.uAttributes = {};
         this.attributes = {};
         this.properties = {};
+        this.linkProperties = {};
 
         this.toDOM = function (nodes, parentPath, parentElement, contexts) {
             // console.log(parentElement);
@@ -26,7 +27,6 @@ function parseHtml(html) {
                     }
                 })();
                 let node = nodes.get(path);
-                console.log(path, node, me.name, Una.$components[me.name.toLocaleLowerCase()].$tree.id);
                 if (node) {
                     if (node.nodeType !== 8) {
                         const cmt = document.createComment('if');
@@ -43,7 +43,7 @@ function parseHtml(html) {
                 return renderFor(nodes, parentPath, parentElement, contexts);
             } else {
                 const path = parentPath + this.id;
-                console.log(path);
+                // console.log(path);
 
                 if (this.type === TYPE_TEXT) {
                     renderText(nodes, path, parentElement, contexts);
@@ -193,14 +193,13 @@ function parseHtml(html) {
             // console.log('component', me.name, me);
             // console.log(contexts);
             const componentContext = {data: {}, methods: {}};
-            for (let k in me.properties){
+            for (let k in me.properties) {
                 let p = me.properties[k];
-
-                if (typeof p === 'function') {
-                    componentContext.method[k] = p;
-                }  else {
-                    componentContext.data[k] = evalText(p, contexts.global, contexts.local);
-                }
+                componentContext.data[k] = evalText(p, contexts.global, contexts.local);
+            }
+            for (let k in me.linkProperties) {
+                let p = me.linkProperties[k];
+                componentContext.data[k] = evalContext(p, contexts.global, contexts.local);
             }
             // console.log(parentPath);
             Una.$components[me.name.toLocaleLowerCase()].toHTML(nodes, parentPath + me.id, parentElement, {
@@ -223,7 +222,7 @@ function parseHtml(html) {
 
         };
 
-        const renderChildren = function(nodes, parentPath, parentElement, contexts, children) {
+        const renderChildren = function (nodes, parentPath, parentElement, contexts, children) {
             if (!children)
                 return;
             for (let i = 0; i < children.length; i++) {
@@ -262,8 +261,12 @@ function parseHtml(html) {
                         node.uAttributes[name] = attr.value;
                     }
                 }
-                if (name.startsWith('u:')) {
-                    node.properties[name.substr(2)] = attr.value;
+                else if (name.startsWith('u:')) {
+                    if (name.startsWith('u::')) {
+                        node.linkProperties[name.substr(3)] = attr.value;
+                    } else {
+                        node.properties[name.substr(2)] = attr.value;
+                    }
                 }
                 else {
                     node.attributes[name] = attr.value;

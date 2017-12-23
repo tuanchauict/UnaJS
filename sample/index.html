@@ -10,43 +10,46 @@
 </head>
 <body>
 <div id="app">
-    <ul>
-        <li u-for="i, item in arr" u-click="onClick(i)">{{item}} Click me</li>
-    </ul>
-    <abc u-if="index===0">Index 1</abc>
-    <abc u-if="index===1">Index 2</abc>
-    <div>Co dinh</div>
+    <abc
+            u:foo0="0"
+            u:foo1="1"
+            u:foo2="2"
+            u:foo3="3"
+            u:foo4="{{10}}"
+            u:foo5="5"
+            u:foo6="6"
+            u:foo7="7"
+            u:foo8="8"
+            u:foo9="9"
+            u:foo10="10"
+    ></abc>
 </div>
-
-
 
 <script>
     Una.component('abc', {
         template: `
 <div>
-    <!--<div>Con heo</div>-->
-    <content/>
+    {{foo0}}
+    {{foo1}}
+    {{foo2}}
+    {{foo3}}
+    {{foo4}}
+    {{foo5}}
+    {{foo6}}
+    {{foo7}}
+    {{foo8}}
+    {{foo9}}
+    {{foo10}}
+
 </div>`,
-        props: ['foo', 'abc'],
-        data: {
-            a: 1
-        }
+        props: ['foo0', 'foo1', 'foo2', 'foo3', 'foo4', 'foo5', 'foo6', 'foo7', 'foo8', 'foo9', 'foo10'],
     });
 
     const app = new Una({
         el: 'app',
         data: {
-            bar: 'Con vit',
-            index: 0,
-            arr: [
-                1, 2
-            ]
+
         },
-        methods: {
-            onClick: function (index) {
-                this.index = index;
-            }
-        }
     })
 </script>
 </body>
